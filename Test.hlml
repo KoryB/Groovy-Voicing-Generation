@@ -1,0 +1,14 @@
+SCAN intervals FOR currentIntervals ON BTAS
+//RESOLVE 11 TO 1
+//if (rootMotion >= 6) {
+//    ROTATE (-1)
+//} else {
+//    ROTATE (1)
+//}
+RESOLVE bass TO currentRoot
+//                SCAN intervals FOR currentIntervals ON BTAS
+////                SCAN inversion FOR [0, 1, 2, 0] ON BTAS
+////                Scan(inversion).For([0, 1, 2, 0]).On(BTAS)
+//                resolve 5.sd to 2.sd
+//                resolve 5.sd to 3.sd
+//                resolve 5.sd to 1.sd

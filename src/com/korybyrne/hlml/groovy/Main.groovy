@@ -23,7 +23,7 @@ class Main {
         ChordProgression p = new ChordProgressionGenerator().createProgression(32)
 
         VoicingRuleHandler.instance.init(p)
-        def voicingProgression = VoicingRuleHandler.instance.voice(Main.&rules)
+        def voicingProgression = VoicingRuleHandler.instance.voice("Test.hlml")
 
         println '//////// VOICINGS START /////////'
 
@@ -53,26 +53,5 @@ class Main {
         score.addPart(new Part(p4))
         Instrument sineWave = new PulsewaveInst(44100)
         Write.au(score, "Test.au", sineWave)
-    }
-
-    static void rules() {
-        use(VoicingCategory) {
-            VoicingRuleHandler.instance.with {
-                SCAN intervals FOR currentIntervals ON BTAS
-                resolve 7.sd to 1.sd
-                if (rootMotion >= 6) {
-                    rotate (-1)
-                } else {
-                    rotate (1)
-                }
-                resolve prevVoicing.bass.pc to workingVoicing.root
-//                SCAN intervals FOR currentIntervals ON BTAS
-////                SCAN inversion FOR [0, 1, 2, 0] ON BTAS
-////                Scan(inversion).For([0, 1, 2, 0]).On(BTAS)
-//                resolve 5.sd to 2.sd
-//                resolve 5.sd to 3.sd
-//                resolve 5.sd to 1.sd
-            }
-        }
     }
 }

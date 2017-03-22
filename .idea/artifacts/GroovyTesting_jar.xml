@@ -1,0 +1,51 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="GroovyTesting:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/GroovyTesting_jar</output-path>
+    <root id="archive" name="GroovyTesting.jar">
+      <element id="module-output" name="GroovyTesting" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/groovy-sql.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/groovy-testng.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/groovy-2.4.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/jcommander.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/ant.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/commons-cli.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/groovy-bsf.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/jsr166y.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/commons-logging.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/asm4-analysis.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/groovy-ant.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/groovy-templates.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/groovy-groovysh.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/jsp-api-2.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/hamcrest-core.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/groovy-docgenerator.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/qdox.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/groovy-xml.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/groovy-jmx.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/jline2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/testng.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/groovy-jsr223.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/jansi.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/groovy-json.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/bsf.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/groovy-console.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/servlet-api-2.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/asm4-tree.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/groovy-servlet.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/xstream.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/ant-antlr.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/asm4-util.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/ivy.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/ant-launcher.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/junit4.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/antlr.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/asm4-commons.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/groovy-test.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/ant-junit.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/groovy-swing.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/groovy-groovydoc.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/share/groovy2/lib/asm4.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/deps/jMusic1.6.4.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

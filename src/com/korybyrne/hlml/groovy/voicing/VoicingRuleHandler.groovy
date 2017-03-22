@@ -2,14 +2,14 @@ package com.korybyrne.hlml.groovy.voicing
 
 import com.korybyrne.hlml.groovy.chord.Chord
 import com.korybyrne.hlml.groovy.chord.ChordProgression
-import com.korybyrne.hlml.groovy.chord.VoicingProgression
 import com.korybyrne.hlml.groovy.note.Note
 import jm.constants.Scales
+import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.runtime.DefaultGroovyMethods
 
-@Singleton
 //TODO: Have this extend from different modules for better abstraction
 //      Perhaps it would use traits?
+@Singleton
 class VoicingRuleHandler {
 
     Voicing prevVoicing, workingVoicing, currVoicing
@@ -23,9 +23,9 @@ class VoicingRuleHandler {
 
     /////////// GENERATORS //////////////
 
-    def move(Voice voice) {
+    def MOVE(Voice voice) {
         return [
-            to: {note ->
+            TO: {note ->
                 voice.setPitch(note as Integer)
 
                 doScan()
@@ -33,9 +33,9 @@ class VoicingRuleHandler {
         ]
     }
 
-    def move(note) {
+    def MOVE(note) {
         return [
-            to: { outNote ->
+            TO: { outNote ->
                 prevVoicing.getVoices().eachWithIndex { Voice entry, int i ->
                     if (entry.getPitch() == (note as Integer)) {
                         workingVoicing[i] = outNote
@@ -47,21 +47,33 @@ class VoicingRuleHandler {
         ]
     }
 
-    def resolve(ScaleDegree sd) {
+    def RESOLVE(Voice voice) {
         return [
-            to: { target ->
+                TO: { target ->
+                    Voice prevVoice = prevVoicing[voice.part]
+                    int offset = Voicing.getPitchClassDistance(prevVoice as Integer, target as Integer)
+                    voice.pitch = prevVoice.pitch + offset
+
+                    doScan()
+                }
+        ]
+    }
+
+    def RESOLVE(ScaleDegree sd) {
+        return [
+            TO: { target ->
                 target = (target in ScaleDegree)? target.toScale(Scales.MAJOR_SCALE) : target as Integer
-                resolve sd.toScale(Scales.MAJOR_SCALE) to target
+                this.RESOLVE sd.toScale(Scales.MAJOR_SCALE) TO target
             }
         ]
     }
 
-    def resolve(pc) {
+    def RESOLVE(pc) {
         return [
-            to: { outPC ->
+            TO: { target ->
                 prevVoicing.getVoices().eachWithIndex { Voice voice, int i ->
-                    int offset = Voicing.getPitchClassDistance(pc as Integer, outPC as Integer)
                     if (voice.getPitchClass() == (pc as Integer)) {
+                        int offset = Voicing.getPitchClassDistance(pc as Integer, target as Integer)
                         workingVoicing[i] = voice.getPitch() + offset
                     }
                 }
@@ -72,7 +84,7 @@ class VoicingRuleHandler {
     }
 
     // TODO: Add any index to index of next chord
-    def rotate(int direction) {
+    def ROTATE(int direction) {
         def newIndices = prevVoicing.getIntervalIndicesFromRoot().collect({
             Math.floorMod(it + direction, prevVoicing.voices.size()-1)
         })[1..-1]
@@ -89,7 +101,7 @@ class VoicingRuleHandler {
         doScan()
     }
 
-    def shortestDistance(int nth = 0) {
+    def DISTANCE(int nth = 0) {
         prevVoicing.getVoices().eachWithIndex { Voice voice, int i ->
             workingVoicing[i] = voice.getPitch() +
                 workingVoicing.getPitchClasses(12).collect({
@@ -216,10 +228,25 @@ class VoicingRuleHandler {
         voicingProgression = new VoicingProgression() + prevVoicing
     }
 
-    VoicingProgression voice(Closure rules) {
+    VoicingProgression voice(String rulesFilename) {
+        Binding binding = new Binding([
+                ruleHandler:    this,
+
+                intervals:      this.intervals,
+                inversion:      this.inversion,
+                motion:         this.motion
+        ])
+        CompilerConfiguration config = new CompilerConfiguration()
+        config.scriptBaseClass = VoicingBaseScriptClass.name
+
+        GroovyShell shell = new GroovyShell(binding, config)
+        File rulesFile = new File(rulesFilename)
+
         chordProgression.elements[1..-1].eachWithIndex {Chord chord, int index ->
             workingVoicing = new Voicing(chord).setNumVoices(4)
-            rules()
+            shell.evaluate(
+                    rulesFile
+            )
             voicingProgression + confirm()
         }
 
@@ -235,11 +262,31 @@ class VoicingRuleHandler {
         return currVoicing
     }
 
+    //////// GROOVY GOODNESS /////////
+
     List<Integer> getCurrentIntervals() {
         return workingVoicing.getIntervals()
     }
 
-    //////// GROOVY GOODNESS /////////
+    int getCurrentRoot() {
+        return workingVoicing.root
+    }
+
+    Voice getSoprano() {
+        return workingVoicing.soprano
+    }
+
+    Voice getAlto() {
+        return workingVoicing.alto
+    }
+
+    Voice getTenor() {
+        return workingVoicing.tenor
+    }
+
+    Voice getBass() {
+        return workingVoicing.bass
+    }
 
     def propertyMissing(String name) {
         switch (name) {

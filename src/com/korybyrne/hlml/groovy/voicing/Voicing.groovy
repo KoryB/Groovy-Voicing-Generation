@@ -2,7 +2,6 @@ package com.korybyrne.hlml.groovy.voicing
 
 import com.korybyrne.hlml.groovy.chord.Chord
 import com.korybyrne.hlml.groovy.chord.ChordProgression
-import com.korybyrne.hlml.groovy.chord.VoicingProgression
 import com.korybyrne.hlml.groovy.note.Note
 
 class Voicing extends Chord implements Voicings {
