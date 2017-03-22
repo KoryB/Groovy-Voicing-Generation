@@ -1,6 +1,8 @@
 package com.korybyrne.hlml.groovy.voicing
 
 abstract class VoicingBaseScriptClass extends Script {
+    private static final List<String> BLACK_LIST = []
+
     def MOVE(Voice voice) {
         return this.binding.ruleHandler.MOVE(voice)
     }
@@ -33,33 +35,24 @@ abstract class VoicingBaseScriptClass extends Script {
         return this.binding.ruleHandler.SCAN(scanner)
     }
 
-    ////// GROOVY GOODNESS ///////
-    
-    List<Integer> getCurrentIntervals() {
-        return this.binding.ruleHandler.workingVoicing.getIntervals()
-    }
+    ////// GETTERS ///////
 
-    int getCurrentRoot() {
-        return this.binding.ruleHandler.workingVoicing.root
-    }
+    //TODO: Fix this methodMissing
+//    def methodMissing(String name, args) {
+//        if (name in BLACK_LIST) {
+//            return null
+//        } else {
+//            def temp = this.binding.ruleHandler."$name"
+//            return temp
+//        }
+//    }
 
-    Voice getSoprano() {
-        return this.binding.ruleHandler.workingVoicing.soprano
-    }
-
-    Voice getAlto() {
-        return this.binding.ruleHandler.workingVoicing.alto
-    }
-
-    Voice getTenor() {
-        return this.binding.ruleHandler.workingVoicing.tenor
-    }
-
-    Voice getBass() {
-        return this.binding.ruleHandler.workingVoicing.bass
-    }
-
+    //TODO: Error handling
     def propertyMissing(String name) {
-        return this.binding.ruleHandler.propertyMissing(name)
+        if (name in BLACK_LIST) {
+            return null
+        } else {
+            return this.binding.ruleHandler."$name"
+        }
     }
 }

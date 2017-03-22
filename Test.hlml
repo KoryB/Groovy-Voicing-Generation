@@ -1,11 +1,18 @@
+//TODO: prevVoicing and workingVoicing access
+//TODO: something with same chord back to back
+//TODO: ability to have 'memory' with variables
+//TODO:     perhaps with missingProperties?
+
 SCAN intervals FOR currentIntervals ON BTAS
-//RESOLVE 11 TO 1
-//if (rootMotion >= 6) {
-//    ROTATE (-1)
-//} else {
-//    ROTATE (1)
-//}
 RESOLVE bass TO currentRoot
+RESOLVE 11 TO 0
+
+if (rootMotion >= 6 && rootMotion != 0) {
+    ROTATE (-1)
+} else {
+    ROTATE (1)
+}
+
 //                SCAN intervals FOR currentIntervals ON BTAS
 ////                SCAN inversion FOR [0, 1, 2, 0] ON BTAS
 ////                Scan(inversion).For([0, 1, 2, 0]).On(BTAS)

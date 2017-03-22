@@ -1,5 +1,6 @@
 package com.korybyrne.hlml.groovy.voicing
 
+import com.korybyrne.hlml.groovy.chord.Chord
 import com.korybyrne.hlml.groovy.chord.Chords
 import jm.constants.Pitches
 

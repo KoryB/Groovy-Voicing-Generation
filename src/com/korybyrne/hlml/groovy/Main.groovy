@@ -20,7 +20,7 @@ class Main {
         Voicing workingVoicing = new Voicing(5, Chords.MAJOR).setNumVoices(4)
         Voicing currVoicing
 
-        ChordProgression p = new ChordProgressionGenerator().createProgression(32)
+        ChordProgression p = new ChordProgressionGenerator().createProgression(8)
 
         VoicingRuleHandler.instance.init(p)
         def voicingProgression = VoicingRuleHandler.instance.voice("Test.hlml")

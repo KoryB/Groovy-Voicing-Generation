@@ -16,10 +16,6 @@ class Voice extends Note {
         if (!this.locked) {
             super.setPitch(pitch)
             this.locked = true
-
-            println "Locking: $part, $pitch"
-        } else {
-            println "Can't change $part to $pitch, I'm locked"
         }
     }
 

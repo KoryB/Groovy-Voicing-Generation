@@ -9,10 +9,14 @@ import org.codehaus.groovy.runtime.DefaultGroovyMethods
 
 //TODO: Have this extend from different modules for better abstraction
 //      Perhaps it would use traits?
-@Singleton
+
 class VoicingRuleHandler {
+    private static VoicingRuleHandler instance
 
     Voicing prevVoicing, workingVoicing, currVoicing
+    Binding binding
+    CompilerConfiguration compilerConfiguration
+    GroovyShell shell
 
     private List voiceMotion
     private List scanners
@@ -20,6 +24,29 @@ class VoicingRuleHandler {
     private VoicingProgression voicingProgression
     private int currentChord
 
+    /////////// SINGLETON ///////////////
+
+    private VoicingRuleHandler() {
+        binding = new Binding([
+                ruleHandler:    this,
+
+                intervals:      this.intervals,
+                inversion:      this.inversion,
+                motion:         this.motion,
+        ])
+        compilerConfiguration = new CompilerConfiguration()
+        compilerConfiguration.scriptBaseClass = VoicingBaseScriptClass.name
+
+        shell = new GroovyShell(binding, compilerConfiguration)
+    }
+
+    static VoicingRuleHandler getInstance() {
+        if (instance == null) {
+            instance = new VoicingRuleHandler()
+        }
+
+        return instance
+    }
 
     /////////// GENERATORS //////////////
 
@@ -72,6 +99,7 @@ class VoicingRuleHandler {
         return [
             TO: { target ->
                 prevVoicing.getVoices().eachWithIndex { Voice voice, int i ->
+//                    println "$pc, $voice.pitch, ${voice.pitch % 12}"
                     if (voice.getPitchClass() == (pc as Integer)) {
                         int offset = Voicing.getPitchClassDistance(pc as Integer, target as Integer)
                         workingVoicing[i] = voice.getPitch() + offset
@@ -88,8 +116,6 @@ class VoicingRuleHandler {
         def newIndices = prevVoicing.getIntervalIndicesFromRoot().collect({
             Math.floorMod(it + direction, prevVoicing.voices.size()-1)
         })[1..-1]
-
-        println newIndices
 
         newIndices.eachWithIndex { int index, int i ->
             workingVoicing[i+1] = prevVoicing[i+1] + Voicing.getPitchClassDistance(
@@ -141,9 +167,9 @@ class VoicingRuleHandler {
         if (confirm) {
             currVoicing = new Voicing(workingVoicing)
         } else {
-            println "Failed! Before: ${workingVoicing.voices.collect {[it.pitch, it.locked]} }"
+//            println "Failed! Before: ${workingVoicing.voices.collect {[it.pitch, it.locked]} }"
             workingVoicing = new Voicing(currVoicing)
-            println "Failed!  After: ${workingVoicing.voices.collect {[it.pitch, it.locked]} }"
+//            println "Failed!  After: ${workingVoicing.voices.collect {[it.pitch, it.locked]} }"
         }
 
         return confirm
@@ -158,7 +184,6 @@ class VoicingRuleHandler {
         }
 
         calculateMotion()
-        println voiceMotion
 
         for (def part : parts) {
             def qualityPair = [voiceMotion[parts[0]], voiceMotion[part]]
@@ -172,9 +197,6 @@ class VoicingRuleHandler {
 
     Closure<Boolean> intervals = {List intervals, List parts ->
         def intervalsFromRoot = workingVoicing.calculateIntervals()
-
-        println "From root: $intervalsFromRoot"
-        println workingVoicing
 
         for (def part : parts) {
             if ( workingVoicing[part].pitch != 0 && !(intervalsFromRoot[part] in intervals) ) {
@@ -199,7 +221,7 @@ class VoicingRuleHandler {
     }
 
     // scan <action> for <quality> on <voices> (could be parts, perhaps other things? ex: no thirds of elements should move in oblique?)
-    public Map SCAN(scanner) {
+    Map SCAN(scanner) {
         return [
             FOR: {quality ->
                 return [
@@ -217,6 +239,13 @@ class VoicingRuleHandler {
         return Voicing.getPositivePitchClassDistance(workingVoicing.root, prevVoicing.root)
     }
 
+    List<Integer> getCurrentIntervals() {
+        return workingVoicing.getIntervals()
+    }
+
+    int getCurrentRoot() {
+        return workingVoicing.root
+    }
 
     ////////// WORKFLOWS ///////////////
 
@@ -229,18 +258,11 @@ class VoicingRuleHandler {
     }
 
     VoicingProgression voice(String rulesFilename) {
-        Binding binding = new Binding([
-                ruleHandler:    this,
-
-                intervals:      this.intervals,
-                inversion:      this.inversion,
-                motion:         this.motion
-        ])
-        CompilerConfiguration config = new CompilerConfiguration()
-        config.scriptBaseClass = VoicingBaseScriptClass.name
-
-        GroovyShell shell = new GroovyShell(binding, config)
         File rulesFile = new File(rulesFilename)
+
+        println '//////////////// FILE START ///////////////'
+        println rulesFile.text
+        println '//////////////// FILE END /////////////////'
 
         chordProgression.elements[1..-1].eachWithIndex {Chord chord, int index ->
             workingVoicing = new Voicing(chord).setNumVoices(4)
@@ -255,6 +277,7 @@ class VoicingRuleHandler {
 
     Voicing confirm() {
         currVoicing = new Voicing(workingVoicing)
+        prevVoicing = new Voicing(currVoicing)
         workingVoicing = null
         voiceMotion = []
         scanners = []
@@ -263,14 +286,6 @@ class VoicingRuleHandler {
     }
 
     //////// GROOVY GOODNESS /////////
-
-    List<Integer> getCurrentIntervals() {
-        return workingVoicing.getIntervals()
-    }
-
-    int getCurrentRoot() {
-        return workingVoicing.root
-    }
 
     Voice getSoprano() {
         return workingVoicing.soprano
