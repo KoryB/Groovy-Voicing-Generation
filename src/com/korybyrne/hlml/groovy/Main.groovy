@@ -1,5 +1,6 @@
 package com.korybyrne.hlml.groovy
 
+import com.korybyrne.hlml.groovy.chord.Chord
 import com.korybyrne.hlml.groovy.chord.Chords
 import com.korybyrne.hlml.groovy.chord.ChordProgression
 import com.korybyrne.hlml.groovy.chord.ChordProgressionGenerator
@@ -20,7 +21,12 @@ class Main {
         Voicing workingVoicing = new Voicing(5, Chords.MAJOR).setNumVoices(4)
         Voicing currVoicing
 
-        ChordProgression p = new ChordProgressionGenerator().createProgression(8)
+//        ChordProgression p = new ChordProgressionGenerator().createProgression(8)
+        ChordProgression p =
+                new Chord(0, Chords.MAJOR) +
+                new Chord(5, Chords.MAJOR) +
+                new Chord(7, Chords.MAJOR) +
+                new Chord(0, Chords.MAJOR)
 
         VoicingRuleHandler.instance.init(p)
         def voicingProgression = VoicingRuleHandler.instance.voice("Test.hlml")

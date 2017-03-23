@@ -74,15 +74,30 @@ class VoicingRuleHandler {
         ]
     }
 
+    //NOTE: If it can't be in the range it will go low.
     def RESOLVE(Voice voice) {
         return [
-                TO: { target ->
-                    Voice prevVoice = prevVoicing[voice.part]
-                    int offset = Voicing.getPitchClassDistance(prevVoice as Integer, target as Integer)
-                    voice.pitch = prevVoice.pitch + offset
+            TO: { target ->
+                return [
+                    WITHIN: { low, high ->
+                        Voice prevVoice = prevVoicing[voice.part]
+                        int offset = Voicing.getPitchClassDistance(prevVoice as Integer, target as Integer)
+                        int newPitch = prevVoice.pitch + offset
 
-                    doScan()
-                }
+                        while (newPitch < low) {
+                            newPitch += 12
+                        }
+
+                        while (newPitch > high) {
+                            newPitch -= 12
+                        }
+
+                        voice.pitch = newPitch
+
+                        doScan()
+                    }
+                ]
+            }
         ]
     }
 

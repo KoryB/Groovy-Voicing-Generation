@@ -4,14 +4,8 @@
 //TODO:     perhaps with missingProperties?
 
 SCAN intervals FOR currentIntervals ON BTAS
-RESOLVE bass TO currentRoot
-RESOLVE 11 TO 0
-
-if (rootMotion >= 6 && rootMotion != 0) {
-    ROTATE (-1)
-} else {
-    ROTATE (1)
-}
+RESOLVE bass TO currentRoot WITHIN 41, 60
+//RESOLVE 11 TO 0
 
 //                SCAN intervals FOR currentIntervals ON BTAS
 ////                SCAN inversion FOR [0, 1, 2, 0] ON BTAS
