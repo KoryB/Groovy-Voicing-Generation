@@ -23,4 +23,11 @@ class Voice extends Note {
     Voice plus(Integer rhs) {
         return new Voice(this.part, getPitch() + rhs)
     }
+
+    boolean unlock() {
+        def rv = locked
+        locked = false
+
+        return rv
+    }
 }

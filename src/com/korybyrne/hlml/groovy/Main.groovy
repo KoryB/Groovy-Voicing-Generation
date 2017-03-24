@@ -5,8 +5,7 @@ import com.korybyrne.hlml.groovy.chord.Chords
 import com.korybyrne.hlml.groovy.chord.ChordProgression
 import com.korybyrne.hlml.groovy.chord.ChordProgressionGenerator
 import com.korybyrne.hlml.groovy.voicing.Voicing
-import com.korybyrne.hlml.groovy.voicing.VoicingCategory
-import com.korybyrne.hlml.groovy.voicing.VoicingRuleHandler
+import com.korybyrne.hlml.groovy.language.LanguageRuleHandler
 import com.korybyrne.hlml.lilyrendering.LilypondHandler
 import inst.PulsewaveInst
 import jm.audio.Instrument
@@ -21,15 +20,20 @@ class Main {
         Voicing workingVoicing = new Voicing(5, Chords.MAJOR).setNumVoices(4)
         Voicing currVoicing
 
-//        ChordProgression p = new ChordProgressionGenerator().createProgression(8)
+//        ChordProgression p = new ChordProgressionGenerator().createProgression(16)
         ChordProgression p =
                 new Chord(0, Chords.MAJOR) +
+//                new Chord(2, Chords.MAJOR) +
+//                new Chord(0, Chords.MAJOR)
+                new Chord(2, Chords.MINOR) +
                 new Chord(5, Chords.MAJOR) +
+                new Chord(2, Chords.MAJOR) +
                 new Chord(7, Chords.MAJOR) +
+                new Chord(11, Chords.DIMINISHED) +
                 new Chord(0, Chords.MAJOR)
 
-        VoicingRuleHandler.instance.init(p)
-        def voicingProgression = VoicingRuleHandler.instance.voice("Test.hlml")
+        LanguageRuleHandler.instance.init(p)
+        def voicingProgression = LanguageRuleHandler.instance.voice("Test.hlml")
 
         println '//////// VOICINGS START /////////'
 

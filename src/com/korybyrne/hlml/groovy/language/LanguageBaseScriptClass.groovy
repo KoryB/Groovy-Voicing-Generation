@@ -1,7 +1,14 @@
-package com.korybyrne.hlml.groovy.voicing
+package com.korybyrne.hlml.groovy.language
 
-abstract class VoicingBaseScriptClass extends Script {
+import com.korybyrne.hlml.groovy.voicing.Voice
+
+abstract class LanguageBaseScriptClass extends Script implements LanguageConstants {
     private static final List<String> BLACK_LIST = []
+
+    //TODO: Figure out why this one is breaking when capitalized
+    def random(Map lowHigh) {
+        return this.binding.ruleHandler.RANDOM(lowHigh.low, lowHigh.high)
+    }
 
     def MOVE(Voice voice) {
         return this.binding.ruleHandler.MOVE(voice)
@@ -46,6 +53,13 @@ abstract class VoicingBaseScriptClass extends Script {
 //            return temp
 //        }
 //    }
+
+    def getTwoVoicePairs() {
+        return [
+            this.binding.ruleHandler.BT, this.binding.ruleHandler.BA, this.binding.ruleHandler.BS,
+            this.binding.ruleHandler.TA, this.binding.ruleHandler.TS, this.binding.ruleHandler.AS
+        ]
+    }
 
     //TODO: Error handling
     def propertyMissing(String name) {

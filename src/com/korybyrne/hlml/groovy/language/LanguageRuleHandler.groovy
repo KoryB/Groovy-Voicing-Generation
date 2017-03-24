@@ -1,17 +1,20 @@
-package com.korybyrne.hlml.groovy.voicing
+package com.korybyrne.hlml.groovy.language
 
+import com.korybyrne.hlml.Globals
 import com.korybyrne.hlml.groovy.chord.Chord
 import com.korybyrne.hlml.groovy.chord.ChordProgression
-import com.korybyrne.hlml.groovy.note.Note
+import com.korybyrne.hlml.groovy.voicing.Voice
+import com.korybyrne.hlml.groovy.voicing.Voicing
+import com.korybyrne.hlml.groovy.voicing.VoicingProgression
+import com.korybyrne.hlml.groovy.voicing.Voicings
 import jm.constants.Scales
 import org.codehaus.groovy.control.CompilerConfiguration
-import org.codehaus.groovy.runtime.DefaultGroovyMethods
 
 //TODO: Have this extend from different modules for better abstraction
 //      Perhaps it would use traits?
 
-class VoicingRuleHandler {
-    private static VoicingRuleHandler instance
+class LanguageRuleHandler {
+    private static LanguageRuleHandler instance
 
     Voicing prevVoicing, workingVoicing, currVoicing
     Binding binding
@@ -26,29 +29,43 @@ class VoicingRuleHandler {
 
     /////////// SINGLETON ///////////////
 
-    private VoicingRuleHandler() {
+    private LanguageRuleHandler() {
         binding = new Binding([
                 ruleHandler:    this,
 
                 intervals:      this.intervals,
-                inversion:      this.inversion,
                 motion:         this.motion,
+                intervalMotion: this.intervalMotion,
+                inversion:      this.inversion,
+                members:         this.members
         ])
         compilerConfiguration = new CompilerConfiguration()
-        compilerConfiguration.scriptBaseClass = VoicingBaseScriptClass.name
+        compilerConfiguration.scriptBaseClass = LanguageBaseScriptClass.name
 
         shell = new GroovyShell(binding, compilerConfiguration)
     }
 
-    static VoicingRuleHandler getInstance() {
+    static LanguageRuleHandler getInstance() {
         if (instance == null) {
-            instance = new VoicingRuleHandler()
+            instance = new LanguageRuleHandler()
         }
 
         return instance
     }
 
     /////////// GENERATORS //////////////
+
+    def RANDOM(int low, int high) {
+        return [
+            ON: { parts->
+                parts.each {
+                    workingVoicing[it] = low + Globals.RANDOM.nextInt(high - low + 1)
+                }
+
+                doScan()
+            }
+        ]
+    }
 
     def MOVE(Voice voice) {
         return [
@@ -170,69 +187,140 @@ class VoicingRuleHandler {
     }
 
     private boolean doScan() {
-        def confirm = true
+        def confirmations
 
         for (Closure scanner : scanners) {
-            if (!scanner.call()) {
-                confirm = false
-                break
+            confirmations = scanner.call()
+            println confirmations
+            confirmations.eachWithIndex { boolean entry, int i ->
+                if (!entry && !currVoicing[i].locked) {
+                    workingVoicing[i].unlock()
+                    workingVoicing[i] = currVoicing[i].getPitch()
+                    workingVoicing[i].unlock()
+                }
             }
         }
 
-        if (confirm) {
-            currVoicing = new Voicing(workingVoicing)
-        } else {
-//            println "Failed! Before: ${workingVoicing.voices.collect {[it.pitch, it.locked]} }"
-            workingVoicing = new Voicing(currVoicing)
-//            println "Failed!  After: ${workingVoicing.voices.collect {[it.pitch, it.locked]} }"
-        }
+        currVoicing = new Voicing(workingVoicing)
 
-        return confirm
+//        if (confirm) {
+//            currVoicing = new Voicing(workingVoicing)
+//        } else {
+////            println "Failed! Before: ${workingVoicing.voices.collect {[it.pitch, it.locked]} }"
+//            workingVoicing = new Voicing(currVoicing)
+////            println "Failed!  After: ${workingVoicing.voices.collect {[it.pitch, it.locked]} }"
+//        }
+
+        return finalConfirmations
     }
 
     //TODO: Make this input good qualities like the other scanners
-    Closure<Boolean> motion = {List qualities, List parts ->
+    Closure<List<Boolean>> motion = {List qualities, List parts ->
         if (parts.size() <= 1) {
             print parts
             println " is bad!"
             return false
         }
 
+        def confirmations = [true] * workingVoicing.voices.size()
         calculateMotion()
 
-        for (def part : parts) {
-            def qualityPair = [voiceMotion[parts[0]], voiceMotion[part]]
+        parts.each {
+            def qualityPair = [voiceMotion[parts[0]], voiceMotion[it]]
             if ( qualityPair in qualities ) {
-                return false
+                confirmations[it] = false
             }
         }
 
-        return true
+        return confirmations
     }
 
-    Closure<Boolean> intervals = {List intervals, List parts ->
+    Closure<List<Boolean>> intervals = {List intervals, List parts ->
         def intervalsFromRoot = workingVoicing.calculateIntervals()
+        def confirmations = [true] * workingVoicing.voices.size()
 
-        for (def part : parts) {
-            if ( workingVoicing[part].pitch != 0 && !(intervalsFromRoot[part] in intervals) ) {
-                return false
+        parts.each {
+            if ( workingVoicing[it].pitch != 0 && !(intervalsFromRoot[it] in intervals) ) {
+                confirmations[it] = false
             }
         }
 
-        return true
+        return confirmations
+    }
+
+    Closure<List<Boolean>> intervalMotion = {List qualities, List parts ->
+        if (parts.size() <= 1) {
+            print parts
+            println " is bad!"
+            return false
+        }
+
+        def confirmations = [true] * workingVoicing.voices.size()
+        def oldIntervals = []
+        def newIntervals = []
+
+        for (int i = 1; i < parts.size(); ++i) {
+            def prevPart = parts[i-1]
+            def part = parts[i]
+            oldIntervals.add(Voicing.getPositivePitchClassDistance(
+                    prevVoicing[prevPart].pitch, prevVoicing[part].pitch
+            ))
+
+            newIntervals.add(Voicing.getPositivePitchClassDistance(
+                    workingVoicing[prevPart].pitch, workingVoicing[part].pitch
+            ))
+        }
+
+        for (int i = 0; i < oldIntervals.size(); ++i) {
+            if ([oldIntervals[i], newIntervals[i]] in qualities) {
+                confirmations[parts[0]] = false
+                confirmations[parts[i+1]] = false
+            }
+        }
+
+        return confirmations
     }
 
     //TODO: Better name than inversion
-    Closure<Boolean> inversion = {List inversions, List parts ->
+    Closure<List<Boolean>> inversion = {List inversions, List parts ->
         def inversion = workingVoicing.getIntervalIndicesFromRoot()
+        def confirmations = [true] * workingVoicing.voices.size()
 
-        for (def part : parts) {
-            if ( inversion[part] != inversions[part] ) {
-                return false
+        if (! (inversion in inversions)) {
+            parts.each {
+                confirmations[it] = false
             }
         }
 
-        return true
+        return confirmations
+    }
+
+    Closure<List<Boolean>> members = {List members, List parts ->
+        def confirmations = [true] * workingVoicing.voices.size()
+        def inversion = workingVoicing.getIntervalIndicesFromRoot()
+        def memberNumbers = [:]
+        def workingMemberNumbers = [:]
+
+        members.each {
+            memberNumbers[it] = (memberNumbers[it] ?: 0) + 1
+        }
+
+        parts.each {
+            if (workingVoicing[it]) {
+                def member = inversion[it]
+
+                if (workingVoicing[it] != 0) {
+                    if (workingMemberNumbers[member] < memberNumbers[member]) {
+                        workingMemberNumbers[member] = (workingMemberNumbers[member] ?: 0) + 1
+                    } else {
+                        confirmations[it] = false
+                    }
+                }
+            }
+        }
+
+        println workingMemberNumbers
+        return confirmations
     }
 
     // scan <action> for <quality> on <voices> (could be parts, perhaps other things? ex: no thirds of elements should move in oblique?)
@@ -281,6 +369,7 @@ class VoicingRuleHandler {
 
         chordProgression.elements[1..-1].eachWithIndex {Chord chord, int index ->
             workingVoicing = new Voicing(chord).setNumVoices(4)
+            currVoicing = new Voicing(workingVoicing)
             shell.evaluate(
                     rulesFile
             )

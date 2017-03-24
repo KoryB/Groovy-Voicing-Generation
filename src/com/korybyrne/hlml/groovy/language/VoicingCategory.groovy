@@ -1,4 +1,4 @@
-package com.korybyrne.hlml.groovy.voicing
+package com.korybyrne.hlml.groovy.language
 
 class ScaleDegree {
     int degree

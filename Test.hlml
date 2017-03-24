@@ -3,8 +3,39 @@
 //TODO: ability to have 'memory' with variables
 //TODO:     perhaps with missingProperties?
 
-SCAN intervals FOR currentIntervals ON BTAS
-RESOLVE bass TO currentRoot WITHIN 41, 60
+
+def goodInversions = [
+    [R, R, T, F], [R, T, R, F],
+    [R, R, F, T], [R, T, F, R],
+    [R, F, T, R], [R, F, R, T]
+]
+
+def RRTF = [R, R, T, F]
+
+SCAN intervals FOR currentIntervals ON SATB
+
+if (currentRoot == 11) {
+    RESOLVE bass TO 2 WITHIN F3, B3
+} else {
+    RESOLVE bass TO currentRoot WITHIN F3, B3
+}
+
+12.times {
+    RESOLVE it TO it
+}
+
+//SCAN inversion FOR goodInversions ON BTAS
+[BT, BA, BS, TA, TS, AS].each {
+    SCAN intervalMotion FOR parallelPerfects ON it
+}
+SCAN members FOR RRTF ON BTAS
+
+DISTANCE 0
+DISTANCE 1
+DISTANCE 2
+
+//SCAN intervals FOR currentIntervals ON BTAS
+//RESOLVE bass TO currentRoot WITHIN 41, 59
 //RESOLVE 11 TO 0
 
 //                SCAN intervals FOR currentIntervals ON BTAS
