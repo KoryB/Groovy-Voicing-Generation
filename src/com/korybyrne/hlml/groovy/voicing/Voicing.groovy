@@ -66,6 +66,11 @@ class Voicing extends Chord implements Voicings {
     }
 
     Voicing voiceRandom() {
+//        this.voices[BASS] = new Voice(BASS, DEFAULT_NOTES[BASS][this.root])
+//        this.voices[TENOR] = new Voice(TENOR, DEFAULT_NOTES[BASS][this.root]+ 12)
+//        this.voices[ALTO] = new Voice(ALTO, DEFAULT_NOTES[ALTO][this.root] + this.getIntervals()[FIFTH])
+//        this.voices[SOPRANO] = new Voice(SOPRANO, DEFAULT_NOTES[ALTO][this.root] + getIntervals()[THIRD] + 12)
+
         this.voices[BASS] = new Voice(BASS, DEFAULT_NOTES[BASS][this.root])
         this.voices[TENOR] = new Voice(TENOR, DEFAULT_NOTES[BASS][this.root] + this.getIntervals()[FIFTH])
         this.voices[ALTO] = new Voice(ALTO, DEFAULT_NOTES[ALTO][this.root] + getIntervals()[THIRD])

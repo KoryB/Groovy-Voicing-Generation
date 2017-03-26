@@ -191,7 +191,7 @@ class LanguageRuleHandler {
 
         for (Closure scanner : scanners) {
             confirmations = scanner.call()
-            println confirmations
+//            println confirmations
             confirmations.eachWithIndex { boolean entry, int i ->
                 if (!entry && !currVoicing[i].locked) {
                     workingVoicing[i].unlock()
@@ -272,7 +272,8 @@ class LanguageRuleHandler {
         }
 
         for (int i = 0; i < oldIntervals.size(); ++i) {
-            if ([oldIntervals[i], newIntervals[i]] in qualities) {
+            def pair = [oldIntervals[i], newIntervals[i]]
+            if (pair in qualities) {
                 confirmations[parts[0]] = false
                 confirmations[parts[i+1]] = false
             }
@@ -314,12 +315,17 @@ class LanguageRuleHandler {
                         workingMemberNumbers[member] = (workingMemberNumbers[member] ?: 0) + 1
                     } else {
                         confirmations[it] = false
+                        workingMemberNumbers[member] = (workingMemberNumbers[member] ?: 0) + 1
                     }
                 }
             }
         }
 
         println workingMemberNumbers
+        println prevVoicing
+        println workingVoicing
+        println currVoicing
+        println confirmations
         return confirmations
     }
 
