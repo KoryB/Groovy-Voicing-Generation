@@ -30,6 +30,12 @@ class LanguageRuleHandler {
     private ChordProgression chordProgression
     private VoicingProgression voicingProgression
     private int currentChord
+    private List falseBitmasks = [
+            0x00000001,
+            0x00000002,
+            0x00000004,
+            0x00000008
+    ]
 
     /////////// SINGLETON ///////////////
 
@@ -301,11 +307,18 @@ class LanguageRuleHandler {
                 def member = inversion[it]
 
                 if (workingVoicing[it] != 0) {
-                    if (workingMemberNumbers[member] < memberNumbers[member]) {
-                        workingMemberNumbers[member] = (workingMemberNumbers[member] ?: 0) + 1
-                    } else {
+                    workingMemberNumbers[member] = (workingMemberNumbers[member] ?: 0) + 1
+                }
+            }
+        }
+
+        parts.each {
+            if (workingVoicing[it]) {
+                def member = inversion[it]
+
+                if (workingVoicing[it] != 0) {
+                    if (workingMemberNumbers[member] > memberNumbers[member]) {
                         confirmations[it] = false
-                        workingMemberNumbers[member] = (workingMemberNumbers[member] ?: 0) + 1
                     }
                 }
             }
@@ -340,11 +353,11 @@ class LanguageRuleHandler {
         frontierSize = workingVoicings.size()
         Voicing workingVoicing
 
-        def numTrue = 0
-        def curTrue = 0
-
         for (int i = 0; i < frontierSize; ++i) {
-            workingVoicing = workingVoicings[i]
+            def falseIndices = []
+            def maxCount
+            workingVoicing = workingVoicings.first()
+            workingVoicings.removeAt(0)
 
             if (workingVoicing.isFinalized()) {
                 println "Terminating: $workingVoicing"
@@ -361,23 +374,41 @@ class LanguageRuleHandler {
                 }
             }
 
-            finalConfirmations.each { if (it) numTrue++ }
             finalConfirmations.eachWithIndex { boolean entry, int idx ->
-                if (!entry) {
+                if (entry) {
+                    if (workingVoicing[idx].pitch != 0) {
+                        workingVoicing[idx].finalized = true
+                    }
+                } else {
+                    falseIndices.add(idx)
                     workingVoicing[idx].unlock()
                     workingVoicing[idx] = 0
                     workingVoicing[idx].unlock()
-                } else {
-                    if (workingVoicing[idx].pitch != 0) {
-                        if (!workingVoicing[idx].finalized) {
-                            println "Finalizing: ${workingVoicing[idx]}"
+                }
+            }
+
+            maxCount = 2 ** falseIndices.size() - 1
+            println "Max: $maxCount"
+            if (maxCount == 0) {
+                workingVoicings.push(workingVoicing)
+            } else {
+                for (int j = 1; j <= maxCount; ++j) {
+                    Voicing voicing = new Voicing(workingVoicing)
+
+                    falseIndices.each {
+                        if ( (j & falseBitmasks[it]) > 0) {
+                            workingVoicing[it].unlock()
+                            workingVoicing[it] = 0
+                            workingVoicing[it].unlock()
                         }
-                        workingVoicing[idx].finalized = true
                     }
+
+                    workingVoicings.push(voicing)
                 }
             }
         }
 
+        println workingVoicings
         return confirmations
     }
 

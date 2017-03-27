@@ -37,6 +37,7 @@ class Voicing extends Chord implements Voicings {
         this.voices = voicing.voices.collect {
             def voice = new Voice(it.part, it.pitch)
             voice.locked = it.locked
+            voice.finalized = it.finalized
 
             return voice
         }
@@ -48,7 +49,7 @@ class Voicing extends Chord implements Voicings {
 
         if (this.voices != null) {
             for (Voice voice : this.voices[-1..0]) {
-                rv += "\t${voice.getPitch()}\t${ROOT_TO_ENGLISH[voice.getPitchClass()]}\n"
+                rv += "\t${voice.getPitch()}\t${ROOT_TO_ENGLISH[voice.getPitchClass()]}${voice.finalized? '-F':''}\n"
             }
         }
 
