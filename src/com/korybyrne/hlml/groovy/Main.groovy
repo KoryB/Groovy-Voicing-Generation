@@ -26,13 +26,13 @@ class Main {
 //        ChordProgression p = new ChordProgressionGenerator().createProgression(16)
         ChordProgression p =
                 new Chord(0, Chords.MAJOR) +
-                new Chord(2, Chords.MINOR) +
+                new Chord(7, Chords.MAJOR) +
 //                new Chord(0, Chords.MAJOR)
 //                new Chord(5, Chords.MAJOR) +
 //                new Chord(2, Chords.MAJOR) +
-                new Chord(7, Chords.MAJOR) +
-//                new Chord(11, Chords.DIMINISHED) +
                 new Chord(0, Chords.MAJOR)
+//                new Chord(11, Chords.DIMINISHED) +
+//                new Chord(0, Chords.MAJOR)
 
         LanguageRuleHandler.instance.init(p)
         def voicingProgression = LanguageRuleHandler.instance.voice("Test.hlml")
