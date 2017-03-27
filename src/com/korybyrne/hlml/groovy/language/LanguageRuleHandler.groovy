@@ -354,7 +354,7 @@ class LanguageRuleHandler {
         Voicing workingVoicing
 
         for (int i = 0; i < frontierSize; ++i) {
-            def falseIndices = []
+            List<Integer> falseIndices = []
             def maxCount
             workingVoicing = workingVoicings.first()
             workingVoicings.removeAt(0)
@@ -368,7 +368,7 @@ class LanguageRuleHandler {
                 confirmations = scanner.call(workingVoicing)
 //            println confirmations
                 confirmations.eachWithIndex { boolean entry, int idx ->
-                    if (!entry && !currVoicing[idx].finalized) {
+                    if (!entry && !workingVoicing[idx].finalized) {
                         finalConfirmations[idx] = false
                     }
                 }
@@ -381,9 +381,6 @@ class LanguageRuleHandler {
                     }
                 } else {
                     falseIndices.add(idx)
-                    workingVoicing[idx].unlock()
-                    workingVoicing[idx] = 0
-                    workingVoicing[idx].unlock()
                 }
             }
 
@@ -395,11 +392,11 @@ class LanguageRuleHandler {
                 for (int j = 1; j <= maxCount; ++j) {
                     Voicing voicing = new Voicing(workingVoicing)
 
-                    falseIndices.each {
-                        if ( (j & falseBitmasks[it]) > 0) {
-                            workingVoicing[it].unlock()
-                            workingVoicing[it] = 0
-                            workingVoicing[it].unlock()
+                    falseIndices.eachWithIndex {int falseIndex, int index ->
+                        if ( (j & falseBitmasks[index]) > 0) {
+                            voicing[falseIndex].unlock()
+                            voicing[falseIndex] = 0
+                            voicing[falseIndex].unlock()
                         }
                     }
 
