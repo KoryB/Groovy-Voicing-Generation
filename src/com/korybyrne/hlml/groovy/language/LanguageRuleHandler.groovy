@@ -62,9 +62,9 @@ class LanguageRuleHandler {
     def RANDOM(int low, int high) {
         return [
             ON: { parts->
-                parts.each {
-                    workingVoicings.each { Voicing workingVoicing ->
-                        workingVoicing[it] = low + Globals.RANDOM.nextInt(high - low + 1)
+                workingVoicings.each { Voicing workingVoicing ->
+                    parts.each {
+                            workingVoicing[it] = low + Globals.RANDOM.nextInt(high - low + 1)
                     }
                 }
 
@@ -102,13 +102,13 @@ class LanguageRuleHandler {
     }
 
     //NOTE: If it can't be in the range it will go low.
-    def RESOLVE(Voice voice) {
+    def RESOLVE(Voicings.Part part) {
         return [
             TO: { target ->
                 return [
                     WITHIN: { low, high ->
                         workingVoicings.each { Voicing workingVoicing ->
-                            Voice prevVoice = prevVoicing[voice.part]
+                            Voice prevVoice = prevVoicing[part.id]
                             int offset = Voicing.getPitchClassDistance(prevVoice as Integer, target as Integer)
                             int newPitch = prevVoice.pitch + offset
 
@@ -120,7 +120,7 @@ class LanguageRuleHandler {
                                 newPitch -= 12
                             }
 
-                            voice.pitch = newPitch
+                            workingVoicing[part.id].pitch = newPitch
                         }
 
                         doScan()
@@ -335,18 +335,30 @@ class LanguageRuleHandler {
     }
 
     private boolean doScan() {
-        def confirmations = []
+        def confirmations = [true] * 4
+        frontierSize = workingVoicings.size()
+        Voicing workingVoicing
 
-        workingVoicings.each {Voicing workingVoicing ->
+        for (int i = 0; i < frontierSize; ++i) {
+            workingVoicing = workingVoicings[i]
+
             for (Closure scanner : scanners) {
                 confirmations = scanner.call(workingVoicing)
 //            println confirmations
-                confirmations.eachWithIndex { boolean entry, int i ->
-                    if (!entry && !currVoicing[i].locked) {
-                        workingVoicing[i].unlock()
-                        workingVoicing[i] = 0
-                        workingVoicing[i].unlock()
+                confirmations.eachWithIndex { boolean entry, int idx ->
+                    if (!entry && !currVoicing[idx].finalized) {
+                        confirmations[idx] = false
                     }
+                }
+            }
+
+            confirmations.eachWithIndex {boolean entry, int idx ->
+                if (!entry) {
+                    workingVoicing[idx].unlock()
+                    workingVoicing[idx] = 0
+                    workingVoicing[idx].unlock()
+                } else {
+                    workingVoicing[idx].finalized = true
                 }
             }
         }
@@ -421,20 +433,20 @@ class LanguageRuleHandler {
 
     //////// GROOVY GOODNESS /////////
 
-    Voice getSoprano() {
-        return currVoicing.soprano
+    Voicings.Part getSoprano() {
+        return Voicings.Part.SOPRANO
     }
 
-    Voice getAlto() {
-        return currVoicing.alto
+    Voicings.Part getAlto() {
+        return Voicings.Part.ALTO
     }
 
-    Voice getTenor() {
-        return currVoicing.tenor
+    Voicings.Part getTenor() {
+        return Voicings.Part.TENOR
     }
 
-    Voice getBass() {
-        return currVoicing.bass
+    Voicings.Part getBass() {
+        return Voicings.Part.BASS
     }
 
     def propertyMissing(String name) {

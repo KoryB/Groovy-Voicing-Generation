@@ -4,7 +4,7 @@ import com.korybyrne.hlml.groovy.note.Note
 
 class Voice extends Note {
     int part
-    boolean locked;
+    boolean locked, finalized;
 
     Voice(int part, int pitch) {
         super(pitch)

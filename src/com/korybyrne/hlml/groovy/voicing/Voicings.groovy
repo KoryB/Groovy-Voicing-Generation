@@ -10,6 +10,15 @@ interface Voicings extends Chords, Pitches {
     int ALTO = 2
     int SOPRANO = 3
 
+    enum Part {
+        BASS(0), TENOR(1), ALTO(2), SOPRANO(3)
+
+        final int id
+        private Part(int id) {
+            this.id = id
+        }
+    }
+
     Map ABBREVIATED = [
             b: BASS,
             t: TENOR,
