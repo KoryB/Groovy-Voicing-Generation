@@ -26,7 +26,7 @@ class Main {
 //        ChordProgression p = new ChordProgressionGenerator().createProgression(16)
         ChordProgression p =
                 new Chord(0, Chords.MAJOR) +
-                new Chord(2, Chords.MAJOR) +
+                new Chord(5, Chords.MAJOR) +
                 new Chord(7, Chords.MAJOR) +
 //                new Chord(0, Chords.MAJOR)
 //                new Chord(5, Chords.MAJOR) +

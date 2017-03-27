@@ -347,17 +347,18 @@ class LanguageRuleHandler {
         ]
     }
 
-    private boolean doScan() {
+    private void doScan() {
+        def finalConfirmations
         frontierSize = workingVoicings.size()
 
         for (int i = 0; i < frontierSize; ++i) {
-            def finalConfirmations = [true] * 4
+            finalConfirmations = [true] * 4
             List<Integer> falseIndices = []
             def maxCount
             Voicing workingVoicing = workingVoicings.first()
             workingVoicings.removeAt(0)
 
-            println "Working: $workingVoicing"
+//            println "Working: $workingVoicing"
 
             if (workingVoicing.isFinalized()) {
                 println "Terminating: $workingVoicing"
@@ -366,7 +367,7 @@ class LanguageRuleHandler {
 
             for (Closure scanner : scanners) {
                 def confirmations = scanner.call(workingVoicing)
-                println "C: $confirmations"
+//                println "C: $confirmations"
                 confirmations.eachWithIndex { boolean entry, int idx ->
                     if (!entry && !workingVoicing[idx].finalized) {
                         finalConfirmations[idx] = false
@@ -384,11 +385,11 @@ class LanguageRuleHandler {
                 }
             }
 
-            println "FC: $finalConfirmations"
-            println "F: $falseIndices"
+//            println "FC: $finalConfirmations"
+//            println "F: $falseIndices"
 
             maxCount = 2 ** falseIndices.size() - 1
-            println "Max: $maxCount"
+//            println "Max: $maxCount"
             if (maxCount == 0) {
                 workingVoicings.push(workingVoicing)
             } else {
@@ -411,7 +412,6 @@ class LanguageRuleHandler {
         }
 
         println workingVoicings
-        return confirmations
     }
 
     ////////// HELPERS /////////////////
