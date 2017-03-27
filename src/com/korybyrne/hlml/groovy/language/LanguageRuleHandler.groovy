@@ -35,13 +35,13 @@ class LanguageRuleHandler {
 
     private LanguageRuleHandler() {
         binding = new Binding([
-                ruleHandler:    this,
+                ruleHandler   : this,
 
-                intervals:      this.intervals,
-                motion:         this.motion,
+                intervals     : this.intervals,
+                motion        : this.motion,
                 intervalMotion: this.intervalMotion,
-                inversion:      this.inversion,
-                members:         this.members
+                inversion     : this.inversion,
+                members       : this.members
         ])
         compilerConfiguration = new CompilerConfiguration()
         compilerConfiguration.scriptBaseClass = LanguageBaseScriptClass.name
@@ -61,99 +61,99 @@ class LanguageRuleHandler {
 
     def RANDOM(int low, int high) {
         return [
-            ON: { parts->
-                workingVoicings.each { Voicing workingVoicing ->
-                    parts.each {
+                ON: { parts ->
+                    workingVoicings.each { Voicing workingVoicing ->
+                        parts.each {
                             workingVoicing[it] = low + Globals.RANDOM.nextInt(high - low + 1)
+                        }
                     }
-                }
 
-                doScan()
-            }
+                    doScan()
+                }
         ]
     }
 
     def MOVE(Voice voice) {
         return [
-            TO: {note ->
-                workingVoicings.each { Voicing workingVoicing ->
-                    voice.setPitch(note as Integer)
-                }
+                TO: { note ->
+                    workingVoicings.each { Voicing workingVoicing ->
+                        voice.setPitch(note as Integer)
+                    }
 
-                doScan()
-            }
+                    doScan()
+                }
         ]
     }
 
     def MOVE(note) {
         return [
-            TO: { outNote ->
-                workingVoicings.each { Voicing workingVoicing ->
-                    prevVoicing.getVoices().eachWithIndex { Voice entry, int i ->
-                        if (entry.getPitch() == (note as Integer)) {
-                            workingVoicing[i] = outNote
+                TO: { outNote ->
+                    workingVoicings.each { Voicing workingVoicing ->
+                        prevVoicing.getVoices().eachWithIndex { Voice entry, int i ->
+                            if (entry.getPitch() == (note as Integer)) {
+                                workingVoicing[i] = outNote
+                            }
                         }
                     }
-                }
 
-                doScan()
-            }
+                    doScan()
+                }
         ]
     }
 
     //NOTE: If it can't be in the range it will go low.
     def RESOLVE(Voicings.Part part) {
         return [
-            TO: { target ->
-                return [
-                    WITHIN: { low, high ->
-                        workingVoicings.each { Voicing workingVoicing ->
-                            Voice prevVoice = prevVoicing[part.id]
-                            int offset = Voicing.getPitchClassDistance(prevVoice as Integer, target as Integer)
-                            int newPitch = prevVoice.pitch + offset
+                TO: { target ->
+                    return [
+                            WITHIN: { low, high ->
+                                workingVoicings.each { Voicing workingVoicing ->
+                                    Voice prevVoice = prevVoicing[part.id]
+                                    int offset = Voicing.getPitchClassDistance(prevVoice as Integer, target as Integer)
+                                    int newPitch = prevVoice.pitch + offset
 
-                            while (newPitch < low) {
-                                newPitch += 12
+                                    while (newPitch < low) {
+                                        newPitch += 12
+                                    }
+
+                                    while (newPitch > high) {
+                                        newPitch -= 12
+                                    }
+
+                                    workingVoicing[part.id].pitch = newPitch
+                                }
+
+                                doScan()
                             }
-
-                            while (newPitch > high) {
-                                newPitch -= 12
-                            }
-
-                            workingVoicing[part.id].pitch = newPitch
-                        }
-
-                        doScan()
-                    }
-                ]
-            }
+                    ]
+                }
         ]
     }
 
     def RESOLVE(ScaleDegree sd) {
         return [
-            TO: { target ->
-                target = (target in ScaleDegree)? target.toScale(Scales.MAJOR_SCALE) : target as Integer
-                this.RESOLVE sd.toScale(Scales.MAJOR_SCALE) TO target
-            }
+                TO: { target ->
+                    target = (target in ScaleDegree) ? target.toScale(Scales.MAJOR_SCALE) : target as Integer
+                    this.RESOLVE sd.toScale(Scales.MAJOR_SCALE) TO target
+                }
         ]
     }
 
     def RESOLVE(pc) {
         return [
-            TO: { target ->
-                workingVoicings.each { Voicing workingVoicing ->
-                    prevVoicing.getVoices().eachWithIndex { Voice voice, int i ->
+                TO: { target ->
+                    workingVoicings.each { Voicing workingVoicing ->
+                        prevVoicing.getVoices().eachWithIndex { Voice voice, int i ->
 //                    println "$pc, $voice.pitch, ${voice.pitch % 12}"
-                        if (voice.getPitchClass() == (pc as Integer)) {
-                            int offset = Voicing.getPitchClassDistance(pc as Integer, target as Integer)
-                            workingVoicing[i] = voice.getPitch() + offset
+                            if (voice.getPitchClass() == (pc as Integer)) {
+                                int offset = Voicing.getPitchClassDistance(pc as Integer, target as Integer)
+                                workingVoicing[i] = voice.getPitch() + offset
+                            }
                         }
                     }
-                }
 
-                doScan()
-            }
+                    doScan()
+                }
         ]
     }
 
@@ -181,7 +181,7 @@ class LanguageRuleHandler {
                 workingVoicing[i] = voice.getPitch() +
                         workingVoicing.getPitchClasses(12).collect({
                             Voicing.getPitchClassDistance(voice.getPitchClass(), it)
-                        }).sort({Math.abs(it)})[nth]
+                        }).sort({ Math.abs(it) })[nth]
             }
         }
 
@@ -205,7 +205,7 @@ class LanguageRuleHandler {
     }
 
     //TODO: Make this input good qualities like the other scanners
-    Closure<List<Boolean>> motion = {List qualities, List parts, Voicing workingVoicing ->
+    Closure<List<Boolean>> motion = { List qualities, List parts, Voicing workingVoicing ->
         if (parts.size() <= 1) {
             print parts
             println " is bad!"
@@ -217,7 +217,7 @@ class LanguageRuleHandler {
 
         parts.each {
             def qualityPair = [voiceMotion[parts[0]], voiceMotion[it]]
-            if ( qualityPair in qualities ) {
+            if (qualityPair in qualities) {
                 confirmations[it] = false
             }
         }
@@ -225,12 +225,12 @@ class LanguageRuleHandler {
         return confirmations
     }
 
-    Closure<List<Boolean>> intervals = {List intervals, List parts, Voicing workingVoicing ->
+    Closure<List<Boolean>> intervals = { List intervals, List parts, Voicing workingVoicing ->
         def intervalsFromRoot = workingVoicing.calculateIntervals()
         def confirmations = [true] * workingVoicing.voices.size()
 
         parts.each {
-            if ( workingVoicing[it].pitch != 0 && !(intervalsFromRoot[it] in intervals) ) {
+            if (workingVoicing[it].pitch != 0 && !(intervalsFromRoot[it] in intervals)) {
                 confirmations[it] = false
             }
         }
@@ -238,7 +238,7 @@ class LanguageRuleHandler {
         return confirmations
     }
 
-    Closure<List<Boolean>> intervalMotion = {List qualities, List parts, Voicing workingVoicing ->
+    Closure<List<Boolean>> intervalMotion = { List qualities, List parts, Voicing workingVoicing ->
         if (parts.size() <= 1) {
             print parts
             println " is bad!"
@@ -250,7 +250,7 @@ class LanguageRuleHandler {
         def newIntervals = []
 
         for (int i = 1; i < parts.size(); ++i) {
-            def prevPart = parts[i-1]
+            def prevPart = parts[i - 1]
             def part = parts[i]
             oldIntervals.add(Voicing.getPositivePitchClassDistance(
                     prevVoicing[prevPart].pitch, prevVoicing[part].pitch
@@ -265,7 +265,7 @@ class LanguageRuleHandler {
             def pair = [oldIntervals[i], newIntervals[i]]
             if (pair in qualities) {
                 confirmations[parts[0]] = false
-                confirmations[parts[i+1]] = false
+                confirmations[parts[i + 1]] = false
             }
         }
 
@@ -273,11 +273,11 @@ class LanguageRuleHandler {
     }
 
     //TODO: Better name than inversion
-    Closure<List<Boolean>> inversion = {List inversions, List parts, Voicing workingVoicing ->
+    Closure<List<Boolean>> inversion = { List inversions, List parts, Voicing workingVoicing ->
         def inversion = workingVoicing.getIntervalIndicesFromRoot()
         def confirmations = [true] * workingVoicing.voices.size()
 
-        if (! (inversion in inversions)) {
+        if (!(inversion in inversions)) {
             parts.each {
                 confirmations[it] = false
             }
@@ -286,7 +286,7 @@ class LanguageRuleHandler {
         return confirmations
     }
 
-    Closure<List<Boolean>> members = {List members, List parts, Voicing workingVoicing ->
+    Closure<List<Boolean>> members = { List members, List parts, Voicing workingVoicing ->
         def confirmations = [true] * workingVoicing.voices.size()
         def inversion = workingVoicing.getIntervalIndicesFromRoot()
         def memberNumbers = [:]
@@ -311,54 +311,69 @@ class LanguageRuleHandler {
             }
         }
 
-        println workingMemberNumbers
-        println prevVoicing
-        println workingVoicing
-        println currVoicing
-        println confirmations
+//        println workingMemberNumbers
+//        println prevVoicing
+//        println workingVoicing
+//        println currVoicing
+//        println confirmations
         return confirmations
     }
 
     // scan <action> for <quality> on <voices> (could be parts, perhaps other things? ex: no thirds of elements should move in oblique?)
     Map SCAN(scanner) {
         return [
-            FOR: {quality ->
-                return [
-                    ON: {parts ->
-                        scanners.add( {Voicing workingVoicing ->
-                            return scanner(quality, parts, workingVoicing)
-                        } )
-                    }
-                ]
-            }
+                FOR: { quality ->
+                    return [
+                            ON: { parts ->
+                                scanners.add({ Voicing workingVoicing ->
+                                    return scanner(quality, parts, workingVoicing)
+                                })
+                            }
+                    ]
+                }
         ]
     }
 
     private boolean doScan() {
-        def confirmations = [true] * 4
+        def finalConfirmations = [true] * 4
+        def confirmations = []
         frontierSize = workingVoicings.size()
         Voicing workingVoicing
 
+        def numTrue = 0
+        def curTrue = 0
+
         for (int i = 0; i < frontierSize; ++i) {
             workingVoicing = workingVoicings[i]
+
+            if (workingVoicing.isFinalized()) {
+                println "Terminating: $workingVoicing"
+                throw new EarlyTerminationException(workingVoicing)
+            }
 
             for (Closure scanner : scanners) {
                 confirmations = scanner.call(workingVoicing)
 //            println confirmations
                 confirmations.eachWithIndex { boolean entry, int idx ->
                     if (!entry && !currVoicing[idx].finalized) {
-                        confirmations[idx] = false
+                        finalConfirmations[idx] = false
                     }
                 }
             }
 
-            confirmations.eachWithIndex {boolean entry, int idx ->
+            finalConfirmations.each { if (it) numTrue++ }
+            finalConfirmations.eachWithIndex { boolean entry, int idx ->
                 if (!entry) {
                     workingVoicing[idx].unlock()
                     workingVoicing[idx] = 0
                     workingVoicing[idx].unlock()
                 } else {
-                    workingVoicing[idx].finalized = true
+                    if (workingVoicing[idx].pitch != 0) {
+                        if (!workingVoicing[idx].finalized) {
+                            println "Finalizing: ${workingVoicing[idx]}"
+                        }
+                        workingVoicing[idx].finalized = true
+                    }
                 }
             }
         }
@@ -407,15 +422,13 @@ class LanguageRuleHandler {
             workingVoicings = [new Voicing(currVoicing)]
 
             try {
-                shell.evaluate(
-                        rulesFile
-                )
-            } catch (EarlyTerminationException e) {
-                currVoicing = e.voicing
-                continue
-            }
+                shell.evaluate rulesFile
+                currVoicing = workingVoicings[0]
 
-            currVoicing = workingVoicings[0]
+            } catch (EarlyTerminationException e) {
+                println "early termination!"
+                currVoicing = e.voicing
+            }
             voicingProgression + confirm()
         }
 
@@ -452,7 +465,7 @@ class LanguageRuleHandler {
     def propertyMissing(String name) {
         switch (name) {
             default:
-                return name.collect {Voicings.ABBREVIATED[it.toLowerCase()] ?: 0}
+                return name.collect { Voicings.ABBREVIATED[it.toLowerCase()] ?: 0 }
         }
     }
 }

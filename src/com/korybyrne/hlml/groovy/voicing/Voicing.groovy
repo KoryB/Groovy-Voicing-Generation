@@ -111,6 +111,16 @@ class Voicing extends Chord implements Voicings {
         }
     }
 
+    boolean isFinalized() {
+        for (Voice voice : this.voices) {
+            if (!voice.finalized) {
+                return false
+            }
+        }
+
+        return true
+    }
+
     int[] getPitches() {
         return this.voices*.getPitch()
     }
