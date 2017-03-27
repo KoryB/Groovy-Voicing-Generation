@@ -347,8 +347,24 @@ class LanguageRuleHandler {
         ]
     }
 
+    private List<Boolean> calculateFinalConfirmations(Voicing workingVoicing) {
+        List<Boolean> finalConfirmations = [true]*4
+
+        for (Closure scanner : scanners) {
+            def confirmations = scanner.call(workingVoicing)
+//                println "C: $confirmations"
+            confirmations.eachWithIndex { boolean entry, int idx ->
+                if (!entry && !workingVoicing[idx].finalized) {
+                    finalConfirmations[idx] = false
+                }
+            }
+        }
+
+        return finalConfirmations
+    }
+
     private void doScan() {
-        def finalConfirmations
+        List<Boolean> finalConfirmations
         frontierSize = workingVoicings.size()
 
         for (int i = 0; i < frontierSize; ++i) {
@@ -358,35 +374,29 @@ class LanguageRuleHandler {
             Voicing workingVoicing = workingVoicings.first()
             workingVoicings.removeAt(0)
 
-//            println "Working: $workingVoicing"
+            println "Working: $workingVoicing"
 
             if (workingVoicing.isFinalized()) {
                 println "Terminating: $workingVoicing"
                 throw new EarlyTerminationException(workingVoicing)
             }
 
-            for (Closure scanner : scanners) {
-                def confirmations = scanner.call(workingVoicing)
-//                println "C: $confirmations"
-                confirmations.eachWithIndex { boolean entry, int idx ->
-                    if (!entry && !workingVoicing[idx].finalized) {
-                        finalConfirmations[idx] = false
-                    }
-                }
-            }
+            finalConfirmations = calculateFinalConfirmations(workingVoicing)
 
             finalConfirmations.eachWithIndex { boolean entry, int idx ->
-                if (entry) {
-                    if (workingVoicing[idx].pitch != 0) {
+                if (workingVoicing[idx].pitch != 0) {
+                    if (entry) {
                         workingVoicing[idx].finalized = true
+                    } else {
+                        if (!workingVoicing[idx].finalized) {
+                            falseIndices.add(idx)
+                        }
                     }
-                } else {
-                    falseIndices.add(idx)
                 }
             }
 
-//            println "FC: $finalConfirmations"
-//            println "F: $falseIndices"
+            println "FC: $finalConfirmations"
+            println "F: $falseIndices"
 
             maxCount = 2 ** falseIndices.size() - 1
 //            println "Max: $maxCount"
@@ -394,6 +404,7 @@ class LanguageRuleHandler {
                 workingVoicings.push(workingVoicing)
             } else {
                 for (int j = 1; j <= maxCount; ++j) {
+                    boolean skip = false
                     Voicing voicing = new Voicing(workingVoicing)
 
                     falseIndices.eachWithIndex {int falseIndex, int index ->
@@ -402,11 +413,27 @@ class LanguageRuleHandler {
                             voicing[falseIndex] = 0
                             voicing[falseIndex].unlock()
                         } else {
-                            voicing[falseIndex].finalized = true
+//                            voicing[falseIndex].finalized = true
                         }
                     }
 
-                    workingVoicings.push(voicing)
+                    finalConfirmations = calculateFinalConfirmations(voicing)
+
+                    finalConfirmations.eachWithIndex { boolean entry, int idx ->
+                        if (entry) {
+                            if (voicing[idx].pitch != 0) {
+                                voicing[idx].finalized = true
+                            }
+                        } else {
+                            if (!voicing[idx].finalized) {
+                                skip = true
+                            }
+                        }
+                    }
+
+                    if (!skip) {
+                        workingVoicings.push(voicing)
+                    }
                 }
             }
         }

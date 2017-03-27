@@ -7,9 +7,12 @@ import com.korybyrne.hlml.groovy.chord.ChordProgressionGenerator
 import com.korybyrne.hlml.groovy.voicing.Voicing
 import com.korybyrne.hlml.groovy.language.LanguageRuleHandler
 import com.korybyrne.hlml.lilyrendering.LilypondHandler
+import inst.FractalInst
 import inst.PluckInst
 import inst.PulsewaveInst
+import inst.SineInst
 import inst.SuperSawInst
+import inst.TextInst
 import inst.VibesInst
 import jm.audio.Instrument
 import jm.music.data.Part
@@ -25,13 +28,13 @@ class Main {
 
 //        ChordProgression p = new ChordProgressionGenerator().createProgression(16)
         ChordProgression p =
-                new Chord(0, Chords.MAJOR) +
-                new Chord(5, Chords.MAJOR) +
+                new Chord(0, Chords.MINOR) +
+                new Chord(2, Chords.DIMINISHED) +
                 new Chord(7, Chords.MAJOR) +
 //                new Chord(0, Chords.MAJOR)
 //                new Chord(5, Chords.MAJOR) +
 //                new Chord(2, Chords.MAJOR) +
-                new Chord(0, Chords.MAJOR)
+                new Chord(0, Chords.MINOR)
 //                new Chord(11, Chords.DIMINISHED) +
 //                new Chord(0, Chords.MAJOR)
 
@@ -64,7 +67,7 @@ class Main {
         score.addPart(new Part(p2))
         score.addPart(new Part(p3))
         score.addPart(new Part(p4))
-        Instrument sineWave = new SuperSawInst(44100)
+        Instrument sineWave = new SineInst(44100)
         Write.au(score, "Test.au", sineWave)
     }
 }
