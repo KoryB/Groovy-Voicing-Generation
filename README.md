@@ -1,2 +1,2 @@
-# MusicGeneration
-Repository for showing my results with music generation.
+# Groovy Voicing Generation
+Groovy project which takes chord progressions, voices them, and uses [lilypond](http://lilypond.org/) to output finished sheet music.
